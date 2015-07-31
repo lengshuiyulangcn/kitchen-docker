@@ -219,9 +219,19 @@ module Kitchen
         eos
         custom = ''
         Array(config[:provision_command]).each do |cmd|
-          custom << "RUN #{cmd}\n"
+          if command_type(cmd)=='docker'
+             custom << "#{cmd}\n"
+          else
+             custom << "RUN #{cmd}\n"
+          end
         end
         [from, platform, base, custom].join("\n")
+      end
+
+      def command_type(cmd)
+        upcase_cmd=cmd.split(' ')[0].upcase
+        return 'docker' if upcase_cmd==cmd
+        return 'normal'
       end
 
       def dockerfile
