@@ -218,17 +218,20 @@ module Kitchen
           RUN chmod 0600 /home/#{username}/.ssh/authorized_keys
         eos
         custom = ''
+        custom <<-eos
+          ENV BUSSER_ROOT="/opt/busser"
+          ENV GEM_HOME="/opt/busser/gems"
+          ENV GEM_PATH="/opt/busser/gems"
+          ENV GEM_CACHE="/opt/busser/gems/cache"
+       eos
         Array(config[:provision_command]).each do |cmd|
-          if command_type(cmd)=='docker'
-             custom << "#{cmd}\n"
-          else
-             custom << "RUN #{cmd}\n"
-          end
+          custom << "RUN #{cmd}\n"
         end
         [from, platform, base, custom].join("\n")
       end
 
       def command_type(cmd)
+        puts cmd
         upcase_cmd=cmd.split(' ')[0].upcase
         return 'docker' if upcase_cmd==cmd
         return 'normal'
